@@ -1,0 +1,12 @@
+# Regras do Projeto (Antigravity Rules)
+
+## 1. Idioma e Padronização
+- Todo o código, nomes de variáveis, funções, documentação e comentários devem ser estritamente em Português (pt-BR).
+
+## 2. Tecnologias e Dependências
+- Uso exclusivo de HTML5 semântico, CSS3 puro e Vanilla JavaScript (ES6+).
+- Não utilizar bibliotecas ou frameworks externos (como React, Vue, Angular, Bootstrap, Tailwind, jQuery, etc.).
+
+## 3. Código Limpo e Modularidade
+- Arquitetura limpa e modular: separar estritamente a camada de interface (manipulação do DOM e eventos de tela) da camada de dados (regras de negócio, modelos e persistência/armazenamento).
+- Aplicar o Princípio de Responsabilidade Única (SRP / SOLID): manter funções concisas, coesas e legíveis.

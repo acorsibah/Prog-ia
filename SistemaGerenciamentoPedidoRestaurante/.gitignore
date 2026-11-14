@@ -1,0 +1,28 @@
+# Ambientes e segredos
+.env
+.env.*
+!.env.example
+
+# Bancos de dados
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+.antigravity/logs/*
+!.antigravity/logs/.gitkeep
+
+# Python / Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ambiente Virtual
+.venv/
+venv/
+ENV/

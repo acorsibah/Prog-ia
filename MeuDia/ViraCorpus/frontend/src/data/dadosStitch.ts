@@ -1,0 +1,96 @@
+// ====================================================================
+// Dados de Demonstracao Fiéis ao Modelo Stitch (Pátio Viracopos)
+// ====================================================================
+
+import { PontoDescarteVCP } from '../types/pontoDescarte';
+
+export const CAIXAS_STITCH_INICIAIS: PontoDescarteVCP[] = [
+  {
+    id: 'cx-vcp-08',
+    codigoCaixa: 'CX-VCP-08',
+    localidade: 'TECA Pátio Norte',
+    setorDescricao: 'Caçamba Roll-on 26m³ • Setor Cargas Internacionais',
+    tipoCaixa: 'Roll-on 26m³',
+    capacidadeM3: 26,
+    ocupacaoPct: 85,
+    volumeM3: 22.1,
+    taraKg: 3400,
+    statusOcupacao: 'ALERTA',
+    materiaisAceitos: ['Madeiras & Paletes Descartáveis', 'Papelão Ondulado Industrial'],
+    instrucaoTitulo: 'Regra Aeroportuária',
+    instrucaoTexto: 'Descarte proibido após as 22h sem autorização COA. Exclusivo para pallets desmontados.',
+    latitude: -23.00742,
+    longitude: -47.13456,
+    ultimaTroca: {
+      dataHora: '24/10/2024 às 14h30',
+      motorista: 'Motorista Silva',
+      veiculoPlaca: 'ABC-4020',
+      detalheLocal: 'Pátio Sul',
+    },
+    ultimaDestinacao: {
+      dataHora: '23/10/2024 às 18h15',
+      destinadora: 'Aterro CTR Paulínia',
+      documentoMtr: 'Manifesto MTR nº 2024-88412',
+      tipoCertificado: 'Certificado Válido',
+    },
+  },
+  {
+    id: 'cx-vcp-03',
+    codigoCaixa: 'CX-VCP-03',
+    localidade: 'Hangar Linha Azul',
+    setorDescricao: 'Container Fechado Estanque • Resíduo Classe I',
+    tipoCaixa: 'Fechado Estanque 6m³',
+    capacidadeM3: 6,
+    ocupacaoPct: 92,
+    volumeM3: 5.5,
+    taraKg: 6000,
+    statusOcupacao: 'CRITICO',
+    materiaisAceitos: ['Estopas, Filtros e Óleo de Turbina (Classe I)'],
+    instrucaoTitulo: 'Segurança Aeronáutica',
+    instrucaoTexto: 'Lacre numerado obrigatório. Não depositar peças metálicas soltas ou solventes deslacrados.',
+    latitude: -23.01124,
+    longitude: -47.13891,
+    ultimaTroca: {
+      dataHora: '21/10/2024 às 09h10',
+      motorista: 'Motorista Carlos Mendonça',
+      veiculoPlaca: 'VCP-9912',
+      detalheLocal: 'Plataforma Hidráulica',
+    },
+    ultimaDestinacao: {
+      dataHora: '21/10/2024 às 16h40',
+      destinadora: 'Unidade Blend Fornos Votoran',
+      documentoMtr: 'Certificado CDF nº 2024-9104',
+      tipoCertificado: 'Destinação Zero Aterro',
+    },
+  },
+  {
+    id: 'cx-vcp-14',
+    codigoCaixa: 'CX-VCP-14',
+    localidade: 'Terminal T1 Desembarque',
+    setorDescricao: 'Compactador Estacionário 15m³ • Praça de Alimentação Sul',
+    tipoCaixa: 'Compactador Estacionário 15m³',
+    capacidadeM3: 15,
+    ocupacaoPct: 42,
+    volumeM3: 6.3,
+    taraKg: 4200,
+    statusOcupacao: 'LIVRE',
+    materiaisAceitos: ['Orgânicos e Sobras de Alimentação', 'Borra de Café e Filtros'],
+    instrucaoTitulo: 'Regra Sanitária ANVISA',
+    instrucaoTexto: 'Sacos biodegradáveis lacrados com duplo nó. Proibido resíduos de voos internacionais (RDC 56).',
+    latitude: -23.00481,
+    longitude: -47.14023,
+    ultimaTroca: {
+      dataHora: '25/10/2024 às 06h00',
+      motorista: 'Motorista Almir Santos',
+      veiculoPlaca: 'VCP-3021',
+      detalheLocal: 'Compactador Traseiro',
+    },
+    ultimaDestinacao: {
+      dataHora: '25/10/2024 às 08h30',
+      destinadora: 'Usina de Compostagem Valinhos',
+      documentoMtr: 'MTR SIGOR nº 2024-118903',
+      tipoCertificado: 'Transformação em Adubo',
+    },
+  },
+];
+

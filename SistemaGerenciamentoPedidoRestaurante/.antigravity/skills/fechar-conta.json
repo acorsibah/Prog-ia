@@ -1,0 +1,50 @@
+{
+  "$schema": "https://antigravity.google.com/schemas/skill.v1.json",
+  "name": "fechar-conta",
+  "displayName": "Fechamento de Conta e Check-out",
+  "description": "Skill para apuração detalhada de itens consumidos em uma mesa, cálculo de subtotal com taxa opcional de 10% e liquidação segura via HITL.",
+  "trigger": "/fechar-conta",
+  "parameters": {
+    "mesa": {
+      "type": "integer",
+      "required": true,
+      "description": "Número da mesa a ter a conta encerrada."
+    },
+    "incluir_servico": {
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "description": "Flag indicando se a taxa de serviço opcional de 10% deve ser aplicada."
+    }
+  },
+  "steps": [
+    {
+      "order": 1,
+      "name": "recuperar_itens_comanda",
+      "action": "database_query",
+      "targetTable": "itens_pedido",
+      "description": "Consultar todos os itens da comanda ativa vinculada à mesa."
+    },
+    {
+      "order": 2,
+      "name": "gerar_memoria_calculo",
+      "action": "calculate_bill",
+      "description": "Apresentar discriminação completa com subtotal, taxa de 10% e total a pagar."
+    },
+    {
+      "order": 3,
+      "name": "aprovacao_liquidacao",
+      "action": "human_in_the_loop_approval",
+      "requireConfirmation": true,
+      "description": "Solicitar aprovação explícita do usuário para quitação e liberação da mesa."
+    }
+  ],
+  "security": {
+    "humanInTheLoop": true,
+    "requiredPermission": "database_write",
+    "tablesMutated": [
+      "pedidos",
+      "mesas"
+    ]
+  }
+}

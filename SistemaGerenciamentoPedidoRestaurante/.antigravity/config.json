@@ -1,0 +1,48 @@
+{
+  "$schema": "https://antigravity.google.com/schemas/config.v1.json",
+  "name": "GastroFlow",
+  "version": "1.0.0",
+  "mcpServers": {
+    "database": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "${DB_PATH}"
+      ],
+      "env": {
+        "DB_PATH": "./src/database/restaurante.sqlite"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "./src"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ]
+    }
+  },
+  "security": {
+    "humanInTheLoop": {
+      "enabled": true,
+      "requireApproval": [
+        "database_write",
+        "file_delete",
+        "terminal_execute"
+      ]
+    },
+    "audit": {
+      "enabled": true,
+      "logFile": ".antigravity/logs/audit.log"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://antigravity.google.com/schemas/skill.v1.json",
+  "name": "abrir-pedido",
+  "displayName": "Abertura de Pedidos",
+  "description": "Skill operacional para abertura de comandas, validação de disponibilidade de mesa e pratos, cálculo de valores e gravação segura com confirmação humana.",
+  "trigger": "/abrir-pedido",
+  "parameters": {
+    "mesa": {
+      "type": "integer",
+      "required": true,
+      "description": "Número da mesa onde o pedido será lançado (deve existir na tabela 'mesas')."
+    },
+    "codigo_item": {
+      "type": "string",
+      "required": true,
+      "description": "Código identificador do item no cardápio (ex: 'RIS-01')."
+    },
+    "quantidade": {
+      "type": "integer",
+      "required": true,
+      "minimum": 1,
+      "description": "Quantidade de itens solicitados (deve ser maior que zero)."
+    },
+    "obs": {
+      "type": "string",
+      "required": false,
+      "default": "",
+      "description": "Observações adicionais ou restrições alimentares do cliente (ex: 'sem cebola')."
+    }
+  },
+  "steps": [
+    {
+      "order": 1,
+      "name": "validar_e_ocupar_mesa",
+      "action": "database_query",
+      "targetTable": "mesas",
+      "description": "Consultar a tabela 'mesas' para validar se a mesa existe e está disponível; atualizar seu status para 'OCUPADA'."
+    },
+    {
+      "order": 2,
+      "name": "validar_disponibilidade_item",
+      "action": "database_query",
+      "targetTable": "cardapio",
+      "description": "Verificar se o 'codigo_item' existe no cardápio e se possui 'disponivel = 1'."
+    },
+    {
+      "order": 3,
+      "name": "preparar_registros_pedido",
+      "action": "calculate_and_stage",
+      "targetTables": [
+        "pedidos",
+        "itens_pedido"
+      ],
+      "description": "Calcular o valor total com base no preço unitário cadastrado e estruturar os registros para as tabelas 'pedidos' e 'itens_pedido'."
+    },
+    {
+      "order": 4,
+      "name": "aprovacao_humana_e_gravacao",
+      "action": "human_in_the_loop_approval",
+      "requireConfirmation": true,
+      "description": "Exibir a discriminação completa do pedido com valores e solicitar aprovação explícita do usuário antes de persistir a gravação no banco de dados."
+    }
+  ],
+  "security": {
+    "humanInTheLoop": true,
+    "requiredPermission": "database_write",
+    "tablesMutated": [
+      "mesas",
+      "pedidos",
+      "itens_pedido"
+    ]
+  }
+}

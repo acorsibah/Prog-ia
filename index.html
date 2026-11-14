@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <title>Agenda Operacional | ViraCorpus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="modo-app">
+  <!-- Cabecalho Estilo Aplicativo ViraCorpus -->
+  <header class="app-barra-superior">
+    <div class="app-conteiner cabecalho-app">
+      <div class="app-identidade">
+        <div class="app-icone-logo">📅</div>
+        <div>
+          <h1>ViraCorpus</h1>
+          <p id="data-atual-rotulo">Controle Diário de Operações</p>
+        </div>
+      </div>
+      <div class="app-acoes-topo">
+        <button id="btn-exportar-planilha" class="btn-app btn-exportar" title="Baixar relatório completo em planilha Excel / CSV">
+          <span>📥 Baixar Planilha</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-conteiner app-principal">
+    <!-- Painel de Giro e Alerta da Base (Resumo Compacto) -->
+    <section class="card-agenda alerta-giro-compacto" aria-label="Status de Giro">
+      <div class="giro-compacto-linha">
+        <div class="giro-info-rapida">
+          <span class="icone-compacto">⚙️</span>
+          <div>
+            <strong>Giro de Caixas na Base (Capacidade: 2)</strong>
+            <span id="texto-status-giro" class="status-giro-rotulo">2 Livres</span>
+          </div>
+        </div>
+        <div class="slots-mini">
+          <span class="slot-pill" id="slot-1-pill">Caixa 1: Livre</span>
+          <span class="slot-pill" id="slot-2-pill">Caixa 2: Livre</span>
+        </div>
+      </div>
+
+      <!-- Alerta Critico de Bloqueio -->
+      <div id="alerta-giro-lotado" class="aviso-bloqueio-agenda oculto">
+        ⚠️ <strong>Giro Lotado (2/2 Caixas Cheias na Base):</strong> Destine uma caixa parada antes de novas trocas.
+      </div>
+    </section>
+
+    <!-- Secao de Pendencias da Base (Caixas Paradas Aguardando Destinacao) -->
+    <section class="card-agenda secao-pendencias-agenda" id="secao-pendencias-base">
+      <div class="topo-secao-agenda">
+        <div class="titulo-com-icone">
+          <span>🛑</span>
+          <strong>Caixas Paradas na Base</strong>
+        </div>
+        <span class="badge-contador-agenda" id="contador-pendencias">0 na base</span>
+      </div>
+      <div id="lista-pendencias-base" class="lista-pendencias-agenda">
+        <!-- Renderizado dinamicamente via JavaScript -->
+      </div>
+    </section>
+
+    <!-- Formulario Estilo Card de Entrada na Agenda -->
+    <section class="card-agenda card-formulario-agenda">
+      <div class="topo-secao-agenda">
+        <div class="titulo-com-icone">
+          <span id="icone-formulario">📝</span>
+          <strong id="titulo-formulario">Nova Atividade na Agenda</strong>
+        </div>
+        <span class="dica-agenda">Preenchimento Rápido</span>
+      </div>
+
+      <form id="formulario-demanda" class="form-agenda" novalidate>
+        <input type="hidden" id="campo-id">
+
+        <!-- Seletor de Atividades com Opcao de Escrever Personalizado -->
+        <div class="campo-app">
+          <label for="campo-tipo">Tipo de Operação *</label>
+          <select id="campo-tipo" class="select-colorido" required>
+            <option value="" disabled selected>Selecione a atividade...</option>
+            <option value="implantacao">🔵 Implantação</option>
+            <option value="troca">🟡 Troca</option>
+            <option value="destinacao">🟢 Destinação</option>
+            <option value="transporte_equipamentos">🟣 Transporte</option>
+            <option value="manutencao">🔴 Parada do Caminhão</option>
+            <option value="abastecimento">⚪ Abastecimento</option>
+            <option value="outro">✍️ Outro (Escrever personalizado)</option>
+          </select>
+        </div>
+
+        <!-- Campo Dinamico para quando o usuario escolhe escrever a operacao -->
+        <div id="bloco-tipo-personalizado" class="campo-app campo-personalizado-box oculto">
+          <label for="campo-tipo-customizado">Digite o Nome da Operação *</label>
+          <input type="text" id="campo-tipo-customizado" placeholder="Ex: Lavagem de caixa, Pesagem na balança, Pátio...">
+        </div>
+
+        <div class="campo-app">
+          <label for="campo-descricao" id="rotulo-descricao">Descrição / Local / Obra *</label>
+          <input type="text" id="campo-descricao" placeholder="Ex: Obra Central - Caixa Roll-On 28m³" required>
+        </div>
+
+        <!-- Campos Condicionais de Abastecimento (Cinza) -->
+        <div id="bloco-abastecimento" class="linha-dupla-app oculto">
+          <div class="campo-app">
+            <label for="campo-litros">Litros Abastecidos *</label>
+            <input type="number" id="campo-litros" step="0.1" min="0" placeholder="Ex: 140.5 L">
+          </div>
+          <div class="campo-app">
+            <label for="campo-km">KM do Momento (Odômetro) *</label>
+            <input type="number" id="campo-km" min="0" placeholder="Ex: 85200">
+          </div>
+        </div>
+
+        <!-- Campo Condicional de Parada do Caminhao (Alerta Vermelho) -->
+        <div id="bloco-manutencao" class="campo-app alerta-vermelho-box oculto">
+          <label for="campo-motivo-manutencao">Motivo da Parada / Oficina *</label>
+          <input type="text" id="campo-motivo-manutencao" placeholder="Ex: Freio travando, troca de óleo, oficina autorizada">
+        </div>
+
+        <div class="linha-dupla-app">
+          <div class="campo-app">
+            <label for="campo-quantidade">Qtd / Viagens *</label>
+            <input type="number" id="campo-quantidade" min="1" value="1" required>
+          </div>
+          <div class="campo-app">
+            <label for="campo-data">Data na Agenda *</label>
+            <input type="date" id="campo-data" required>
+          </div>
+        </div>
+
+        <div class="campo-app">
+          <label for="campo-observacoes">Observações / MTR</label>
+          <textarea id="campo-observacoes" rows="2" placeholder="Observações de campo, placa, MTR..."></textarea>
+        </div>
+
+        <div class="botoes-form-agenda">
+          <button type="submit" id="btn-salvar" class="btn-app btn-salvar-agenda">
+            + Salvar na Agenda
+          </button>
+          <button type="button" id="btn-cancelar" class="btn-app btn-cancelar-agenda oculto">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Visualizacao da Agenda / Timeline Diaria -->
+    <section class="card-agenda secao-timeline-agenda">
+      <div class="barra-agenda-filtros">
+        <div class="titulo-agenda-feed">
+          <h2>Linha do Tempo Operacional</h2>
+          <span class="sub-feed">Registros organizados por data e status</span>
+        </div>
+        <div class="controles-filtro-agenda">
+          <input type="date" id="filtro-data" title="Filtrar por data específica">
+          <select id="filtro-tipo" title="Filtrar por tipo de atividade">
+            <option value="todos">Todos os Tipos</option>
+            <option value="implantacao">🔵 Implantação</option>
+            <option value="troca">🟡 Troca</option>
+            <option value="destinacao">🟢 Destinação</option>
+            <option value="transporte_equipamentos">🟣 Transporte</option>
+            <option value="manutencao">🔴 Parada do Caminhão</option>
+            <option value="abastecimento">⚪ Abastecimento</option>
+            <option value="outro">✍️ Personalizados</option>
+          </select>
+          <button id="btn-limpar-filtros" class="btn-mini-agenda" title="Limpar filtros">✕ Limpar</button>
+        </div>
+      </div>
+
+      <!-- Feed / Linha do Tempo da Agenda -->
+      <div id="lista-demandas" class="feed-agenda">
+        <!-- Itens inseridos dinamicamente como eventos de agenda -->
+      </div>
+
+      <div id="mensagem-vazia" class="mensagem-vazia-agenda oculto">
+        <p>Nenhuma atividade registrada na agenda para a data selecionada.</p>
+      </div>
+    </section>
+
+    <!-- Rodape com a Opcao de Baixar o APK para Android no Final da Pagina -->
+    <footer class="rodape-app">
+      <div class="card-agenda card-rodape-download">
+        <div class="info-apk-rodape">
+          <span class="icone-apk">📲</span>
+          <div>
+            <strong>Instalar Aplicativo no Android</strong>
+            <p>Baixe o instalador direto para o seu celular ou use pelo navegador</p>
+          </div>
+        </div>
+        <a href="/ViraCorpus.apk" download class="btn-app btn-apk-rodape" title="Baixar APK instalável para Android">
+          Baixar APK ViraCorpus
+        </a>
+      </div>
+      <p class="copyright-app">ViraCorpus &copy; 2026 — Gestão Operacional e Frota</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://antigravity.google.com/schemas/skill.v1.json",
+  "name": "audit-security",
+  "displayName": "Auditoria de Segurança do Sistema",
+  "description": "Skill para inspeção de segurança das configurações .env, políticas HITL, sanitização de segredos e conformidade com o Google Antigravity.",
+  "trigger": "/audit-security",
+  "parameters": {},
+  "steps": [
+    {
+      "order": 1,
+      "name": "verificar_arquivo_env",
+      "action": "inspect_environment",
+      "description": "Validar presença das variáveis obrigatórias sem expor seus valores confidenciais."
+    },
+    {
+      "order": 2,
+      "name": "verificar_politica_hitl",
+      "action": "inspect_antigravity_config",
+      "description": "Validar se a política Human-in-the-Loop está ativada no .antigravity/config.json."
+    },
+    {
+      "order": 3,
+      "name": "verificar_integridade_logs",
+      "action": "inspect_audit_logs",
+      "description": "Validar se o arquivo .antigravity/logs/audit.log é gravável e possui histórico consistente."
+    }
+  ],
+  "security": {
+    "humanInTheLoop": false,
+    "sanitizeSecrets": true
+  }
+}

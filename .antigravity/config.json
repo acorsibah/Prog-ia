@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "name": "auditar_codigo",
+      "trigger": "/auditar",
+      "description": "Auditoria de segurança e qualidade do código no arquivo atual.",
+      "action": "Ler o arquivo atual, analisar e identificar potenciais vulnerabilidades de segurança (tais como senhas ou credenciais expostas, falhas de injeção e ausência de validação/sanitização de entradas) e propor correções imediatas com código seguro."
+    }
+  ]
+}

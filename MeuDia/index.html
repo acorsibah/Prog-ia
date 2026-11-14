@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Dia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Cabeçalho do app -->
+    <header class="header">
+      <h1 class="titulo">📋 Meu Dia</h1>
+      <p class="subtitulo">Organize suas tarefas com simplicidade</p>
+    </header>
+
+    <!-- Formulário de adição de tarefa -->
+    <div class="formulario">
+      <input
+        type="text"
+        id="inputTarefa"
+        class="input-tarefa"
+        placeholder="Digite uma nova tarefa..."
+        maxlength="120"
+      />
+      <button id="btnAdicionar" class="btn-adicionar">Adicionar</button>
+    </div>
+
+    <!-- Contador de tarefas -->
+    <div class="contador">
+      <span id="contadorTexto">0 tarefas</span>
+    </div>
+
+    <!-- Lista de tarefas -->
+    <ul id="listaTarefas" class="lista-tarefas"></ul>
+
+    <!-- Mensagem quando a lista está vazia -->
+    <div id="listaVazia" class="lista-vazia">
+      <span class="icone-vazio">☀️</span>
+      <p>Nenhuma tarefa ainda.<br/>Adicione algo para começar!</p>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

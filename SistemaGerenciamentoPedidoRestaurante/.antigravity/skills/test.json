@@ -1,0 +1,33 @@
+{
+  "$schema": "https://antigravity.google.com/schemas/skill.v1.json",
+  "name": "test",
+  "displayName": "Execução de Testes Automatizados",
+  "description": "Skill para inspeção prévia dos casos de teste do pytest e execução controlada com confirmação humana explícita.",
+  "trigger": "/test",
+  "parameters": {},
+  "steps": [
+    {
+      "order": 1,
+      "name": "listar_cenarios_de_teste",
+      "action": "inspect_test_suite",
+      "description": "Exibir a listagem de todos os módulos de teste pytest disponíveis."
+    },
+    {
+      "order": 2,
+      "name": "confirmacao_do_operador",
+      "action": "human_in_the_loop_approval",
+      "requireConfirmation": true,
+      "description": "Solicitar aprovação explícita antes de disparar o executor de testes."
+    },
+    {
+      "order": 3,
+      "name": "executar_testes",
+      "action": "run_pytest_suite",
+      "description": "Executar a suíte de testes de forma isolada e apresentar os resultados com assertividade."
+    }
+  ],
+  "security": {
+    "humanInTheLoop": true,
+    "requireConfirmation": true
+  }
+}
