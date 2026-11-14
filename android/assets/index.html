@@ -8,33 +8,30 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  <title>Agenda Operacional | EcoLog Roll-On</title>
+  <title>Agenda Operacional | ViraCorpus</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="modo-app">
-  <!-- Cabecalho Estilo Aplicativo Movel -->
+  <!-- Cabecalho Estilo Aplicativo ViraCorpus -->
   <header class="app-barra-superior">
     <div class="app-conteiner cabecalho-app">
       <div class="app-identidade">
         <div class="app-icone-logo">📅</div>
         <div>
-          <h1>Agenda <span>EcoLog</span></h1>
+          <h1>ViraCorpus</h1>
           <p id="data-atual-rotulo">Controle Diário de Operações</p>
         </div>
       </div>
       <div class="app-acoes-topo">
-        <a href="/EcoLog-Agenda.apk" download class="btn-app btn-apk" title="Baixar aplicativo instalável para Android">
-          <span>📲 Baixar APK</span>
-        </a>
         <button id="btn-exportar-planilha" class="btn-app btn-exportar" title="Baixar relatório completo em planilha Excel / CSV">
-          <span>📥 Planilha</span>
+          <span>📥 Baixar Planilha</span>
         </button>
       </div>
     </div>
   </header>
 
   <main class="app-conteiner app-principal">
-    <!-- Painel de Giro e Alerta da Base (Resumo Compacto de Agenda) -->
+    <!-- Painel de Giro e Alerta da Base (Resumo Compacto) -->
     <section class="card-agenda alerta-giro-compacto" aria-label="Status de Giro">
       <div class="giro-compacto-linha">
         <div class="giro-info-rapida">
@@ -56,7 +53,7 @@
       </div>
     </section>
 
-    <!-- Seção de Pendencias da Base (Caixas Paradas Aguardando Destinacao) -->
+    <!-- Secao de Pendencias da Base (Caixas Paradas Aguardando Destinacao) -->
     <section class="card-agenda secao-pendencias-agenda" id="secao-pendencias-base">
       <div class="topo-secao-agenda">
         <div class="titulo-com-icone">
@@ -66,7 +63,7 @@
         <span class="badge-contador-agenda" id="contador-pendencias">0 na base</span>
       </div>
       <div id="lista-pendencias-base" class="lista-pendencias-agenda">
-        <!-- Renderizado dinamicamente -->
+        <!-- Renderizado dinamicamente via JavaScript -->
       </div>
     </section>
 
@@ -83,7 +80,7 @@
       <form id="formulario-demanda" class="form-agenda" novalidate>
         <input type="hidden" id="campo-id">
 
-        <!-- Seletor com as 4 Operacoes Principais + Alerta de Parada e Abastecimento -->
+        <!-- Seletor de Atividades com Opcao de Escrever Personalizado -->
         <div class="campo-app">
           <label for="campo-tipo">Tipo de Operação *</label>
           <select id="campo-tipo" class="select-colorido" required>
@@ -94,7 +91,14 @@
             <option value="transporte_equipamentos">🟣 Transporte</option>
             <option value="manutencao">🔴 Parada do Caminhão</option>
             <option value="abastecimento">⚪ Abastecimento</option>
+            <option value="outro">✍️ Outro (Escrever personalizado)</option>
           </select>
+        </div>
+
+        <!-- Campo Dinamico para quando o usuario escolhe escrever a operacao -->
+        <div id="bloco-tipo-personalizado" class="campo-app campo-personalizado-box oculto">
+          <label for="campo-tipo-customizado">Digite o Nome da Operação *</label>
+          <input type="text" id="campo-tipo-customizado" placeholder="Ex: Lavagem de caixa, Pesagem na balança, Pátio...">
         </div>
 
         <div class="campo-app">
@@ -164,6 +168,7 @@
             <option value="transporte_equipamentos">🟣 Transporte</option>
             <option value="manutencao">🔴 Parada do Caminhão</option>
             <option value="abastecimento">⚪ Abastecimento</option>
+            <option value="outro">✍️ Personalizados</option>
           </select>
           <button id="btn-limpar-filtros" class="btn-mini-agenda" title="Limpar filtros">✕ Limpar</button>
         </div>
@@ -178,6 +183,23 @@
         <p>Nenhuma atividade registrada na agenda para a data selecionada.</p>
       </div>
     </section>
+
+    <!-- Rodape com a Opcao de Baixar o APK para Android no Final da Pagina -->
+    <footer class="rodape-app">
+      <div class="card-agenda card-rodape-download">
+        <div class="info-apk-rodape">
+          <span class="icone-apk">📲</span>
+          <div>
+            <strong>Instalar Aplicativo no Android</strong>
+            <p>Baixe o instalador direto para o seu celular ou use pelo navegador</p>
+          </div>
+        </div>
+        <a href="/ViraCorpus.apk" download class="btn-app btn-apk-rodape" title="Baixar APK instalável para Android">
+          Baixar APK ViraCorpus
+        </a>
+      </div>
+      <p class="copyright-app">ViraCorpus &copy; 2026 — Gestão Operacional e Frota</p>
+    </footer>
   </main>
 
   <script src="app.js"></script>

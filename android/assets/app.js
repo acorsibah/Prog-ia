@@ -103,45 +103,59 @@ class ServicoDemandas {
     return novaDestinacao;
   }
 
-  // Exporta todas as informações cadastradas para planilha CSV (Excel)
-  static async exportarPlanilha() {
+  // Monta o cabeçalho e as linhas CSV das demandas exportadas
+  static async montarCSV() {
     const demandas = await ServicoDemandas.obterTodas();
     const cabecalho = 'ID;Data;Tipo de Operacao;Descricao / Local;Qtd;Litros;KM;Motivo Manutencao;Observacoes;Status Base\n';
-    let linhas = '';
     if (demandas.length === 0) {
-      linhas = '1;' + new Date().toLocaleDateString('pt-BR') + ';Sem Registros;Nenhuma demanda realizada ainda;0;;;;;';
-    } else {
-      linhas = demandas.map((d) => ServicoDemandas.formatarLinhaCSV(d)).join('\n');
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      return cabecalho + '1;' + hoje + ';Sem Registros;Nenhuma demanda realizada ainda;0;;;;;';
     }
-    ServicoDemandas.dispararDownload(cabecalho + linhas);
+    return cabecalho + demandas.map((d) => ServicoDemandas.formatarLinhaCSV(d)).join('\n');
+  }
+
+  // Envia o CSV ao servidor para forçar download nativo no mobile
+  static async exportarPlanilha() {
+    const conteudo = await ServicoDemandas.montarCSV();
+    await ServicoDemandas.dispararDownload(conteudo);
   }
 
   // Trata e formata uma linha única para o arquivo CSV
   static formatarLinhaCSV(d) {
-    const tipo = ControladorUI.obterRotulo(d.tipo);
+    const tipo = ControladorUI.obterRotulo(d.tipo, d.tipoPersonalizado);
     const dataFmt = ControladorUI.formatarData(d.data);
     const desc = (d.descricao || '').replace(/;/g, ',');
     const obs = (d.observacoes || '').replace(/;/g, ',').replace(/\n/g, ' ');
     const mot = (d.motivoManutencao || '').replace(/;/g, ',');
     const lit = d.litros ? String(d.litros).replace('.', ',') : '';
-    const km = d.km !== null ? d.km : '';
+    const km = d.km !== null && d.km !== undefined ? d.km : '';
     return `${d.id};${dataFmt};${tipo};${desc};${d.quantidade};${lit};${km};${mot};${obs};${d.statusPendencia || ''}`;
   }
 
-  // Cria o arquivo Blob com codificação UTF-8 e inicia o download
-  static dispararDownload(conteudo) {
-    const nome = `Agenda_EcoLog_Demandas_${new Date().toISOString().split('T')[0]}.csv`;
+  // Cria blob CSV com BOM UTF-8 para compatibilidade com Excel
+  static criarBlobCSV(conteudo) {
+    return new Blob(['\uFEFF' + conteudo], { type: 'text/csv;charset=utf-8;' });
+  }
+
+  // Aciona o link de download a partir do blob (timeout longo para mobile)
+  static acionarLinkBlob(blob) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'ViraCorpus_Agenda_' + new Date().toISOString().split('T')[0] + '.csv';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 10000);
+  }
+
+  // Baixa planilha via Blob local — funciona no mobile sem necessidade de servidor
+  static async dispararDownload(conteudo) {
     try {
-      const blob = new Blob(['\uFEFF' + conteudo], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = nome;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 3000);
+      const blob = ServicoDemandas.criarBlobCSV(conteudo);
+      ServicoDemandas.acionarLinkBlob(blob);
     } catch (erro) {
-      window.open('data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(conteudo), '_blank');
+      alert('Erro ao baixar planilha: ' + erro.message);
     }
   }
 }
@@ -175,6 +189,7 @@ class ControladorUI {
     const tipo = document.getElementById('campo-tipo').value;
     document.getElementById('bloco-abastecimento').classList.toggle('oculto', tipo !== 'abastecimento');
     document.getElementById('bloco-manutencao').classList.toggle('oculto', tipo !== 'manutencao');
+    document.getElementById('bloco-tipo-personalizado').classList.toggle('oculto', tipo !== 'outro');
     ControladorUI.ajustarRotulosDinamicos(tipo);
   }
 
@@ -222,9 +237,12 @@ class ControladorUI {
 
   // Captura os valores informados nos campos do formulário
   static obterValoresFormulario() {
+    const tipo = document.getElementById('campo-tipo').value;
+    const tipoPersonalizado = document.getElementById('campo-tipo-customizado').value.trim();
     return {
       id: document.getElementById('campo-id').value || null,
-      tipo: document.getElementById('campo-tipo').value,
+      tipo: tipo,
+      tipoPersonalizado: tipo === 'outro' ? tipoPersonalizado : '',
       descricao: document.getElementById('campo-descricao').value.trim(),
       quantidade: parseInt(document.getElementById('campo-quantidade').value, 10),
       data: document.getElementById('campo-data').value,
@@ -252,8 +270,12 @@ class ControladorUI {
     return ControladorUI.validarCamposEspecificos(dados);
   }
 
-  // Valida regras específicas para abastecimento e manutenção
+  // Valida regras específicas para tipo personalizado, abastecimento e manutenção
   static validarCamposEspecificos(dados) {
+    if (dados.tipo === 'outro' && !dados.tipoPersonalizado) {
+      alert('Informe o nome da operação personalizada no campo "Nome da Operação".');
+      return false;
+    }
     if (dados.tipo === 'abastecimento' && (!dados.litros || dados.litros <= 0 || dados.km === null || dados.km < 0)) {
       alert('Para abastecimento, informe os litros (>0) e o KM atual do momento.');
       return false;
@@ -381,17 +403,31 @@ class ControladorUI {
     return card;
   }
 
+  // Monta o topo do card com rótulo e data
+  static montarTopoCabecalho(demanda) {
+    const rotulo = ControladorUI.obterRotulo(demanda.tipo, demanda.tipoPersonalizado);
+    const dataFmt = ControladorUI.formatarData(demanda.data);
+    return `<div class="cabecalho-item-agenda"><span class="tag-tipo">${rotulo}</span><span class="agenda-data-hora">📅 ${dataFmt}</span></div>`;
+  }
+
+  // Monta os botões de ação do card
+  static montarAcoesCard(id) {
+    return `<div class="acoes-item-agenda">
+      <button class="btn-acao-agenda btn-acao-editar" data-id="${id}">Editar</button>
+      <button class="btn-acao-agenda btn-acao-excluir" data-id="${id}">Excluir</button>
+    </div>`;
+  }
+
   // Gera o HTML seguro do corpo do card de demanda no formato agenda
   static montarHtmlCard(demanda) {
     const desc = ControladorUI.sanitizarHTML(demanda.descricao);
     const obs = ControladorUI.sanitizarHTML(demanda.observacoes);
     const chips = ControladorUI.gerarChipsEspecificos(demanda);
-    const rotulo = ControladorUI.obterRotulo(demanda.tipo);
-    const dataFmt = ControladorUI.formatarData(demanda.data);
+    const topo = ControladorUI.montarTopoCabecalho(demanda);
+    const acoes = ControladorUI.montarAcoesCard(demanda.id);
     const htmlObs = obs ? `<div class="agenda-obs">📋 ${obs}</div>` : '';
-    const acoes = `<div class="acoes-item-agenda"><button class="btn-acao-agenda btn-acao-editar" data-id="${demanda.id}">Editar</button><button class="btn-acao-agenda btn-acao-excluir" data-id="${demanda.id}">Excluir</button></div>`;
-    const topo = `<div class="cabecalho-item-agenda"><span class="tag-tipo">${rotulo}</span><span class="agenda-data-hora">📅 ${dataFmt}</span></div>`;
-    return `<div class="corpo-agenda">${topo}<div class="agenda-titulo">${desc}</div>${chips}<div class="chip-dado">Qtd / Viagens: <strong>${demanda.quantidade}</strong></div>${htmlObs}</div>${acoes}`;
+    const qtd = `<div class="chip-dado">Qtd / Viagens: <strong>${demanda.quantidade}</strong></div>`;
+    return `<div class="corpo-agenda">${topo}<div class="agenda-titulo">${desc}</div>${chips}${qtd}${htmlObs}</div>${acoes}`;
   }
 
   // Gera chips informativos para abastecimento (Cinza) ou manutenção (Vermelho)
@@ -434,12 +470,13 @@ class ControladorUI {
     document.getElementById('campo-id').value = item.id;
     document.getElementById('campo-tipo').value = item.tipo;
     ControladorUI.aoAlterarTipo();
+    document.getElementById('campo-tipo-customizado').value = item.tipoPersonalizado || '';
     document.getElementById('campo-descricao').value = item.descricao;
     document.getElementById('campo-quantidade').value = item.quantidade;
     document.getElementById('campo-data').value = item.data;
     document.getElementById('campo-observacoes').value = item.observacoes || '';
     document.getElementById('campo-litros').value = item.litros || '';
-    document.getElementById('campo-km').value = item.km !== null ? item.km : '';
+    document.getElementById('campo-km').value = item.km !== null && item.km !== undefined ? item.km : '';
     document.getElementById('campo-motivo-manutencao').value = item.motivoManutencao || '';
   }
 
@@ -452,6 +489,7 @@ class ControladorUI {
   static limparFormulario() {
     document.getElementById('formulario-demanda').reset();
     document.getElementById('campo-id').value = '';
+    document.getElementById('campo-tipo-customizado').value = '';
     document.getElementById('campo-litros').value = '';
     document.getElementById('campo-km').value = '';
     document.getElementById('campo-motivo-manutencao').value = '';
@@ -478,14 +516,15 @@ class ControladorUI {
   }
 
   // Traduz o identificador do tipo para rótulo legível
-  static obterRotulo(tipo) {
+  static obterRotulo(tipo, tipoPersonalizado) {
     const tipos = {
       troca: 'Troca',
       destinacao: 'Destinação',
       implantacao: 'Implantação',
       transporte_equipamentos: 'Transporte',
       manutencao: 'Parada do Caminhão',
-      abastecimento: 'Abastecimento'
+      abastecimento: 'Abastecimento',
+      outro: tipoPersonalizado || 'Personalizado'
     };
     return tipos[tipo] || tipo;
   }
